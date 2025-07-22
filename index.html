@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chaitanya Krishna Reddy - Portfolio RPG</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/feather-icons"></script>
+    <style>
+        /* * RETRO GAME THEME STYLES
+         * This version includes a dynamic background, a character controlled by scroll,
+         * and a day/night theme toggle with new special effects.
+        */
+        :root {
+            --bg-color-light: #4A90E2;
+            --bg-color-dark: #000020;
+            --ground-color-light: #4CAF50;
+            --ground-color-dark: #1A2A3A;
+            --text-color-light: #000030;
+            --text-color-dark: #E0E0E0;
+            --window-bg-light: rgba(255, 255, 255, 0.7);
+            --window-bg-dark: #000030;
+            --border-color-light: #000030;
+            --border-color-dark: #E0E0E0;
+            --secondary-text-light: #1c3d5a;
+        }
+
+        body {
+            font-family: 'Press Start 2P', cursive;
+            background-color: var(--bg-color-dark);
+            color: var(--text-color-dark);
+            text-shadow: 2px 2px #000000;
+            transition: background-color 0.5s ease;
+        }
+
+        /* --- THEME SWITCHING --- */
+        body.light-mode {
+            background-color: var(--bg-color-light);
+            color: var(--text-color-light);
+            text-shadow: 1px 1px rgba(255,255,255,0.5);
+        }
+        body.light-mode .window-box {
+            background-color: var(--window-bg-light);
+            border-color: var(--border-color-light);
+            color: var(--text-color-light);
+        }
+        body.light-mode .secondary-text {
+            color: var(--secondary-text-light);
+            text-shadow: none;
+        }
+        body.light-mode #header {
+            background-color: var(--bg-color-light);
+            border-bottom-color: var(--border-color-light);
+        }
+        body.light-mode .btn-retro {
+            border-color: #000;
+            color: #000;
+            text-shadow: 1px 1px #FFF;
+        }
+        body.light-mode .btn-retro:hover {
+            color: #FFF;
+        }
+        body.light-mode footer {
+            border-top-color: var(--border-color-light);
+        }
+        body.light-mode #game-ground {
+            background-color: var(--ground-color-light);
+        }
+        body.light-mode .project-card {
+            background-color: rgba(255,255,255,0.5);
+            color: var(--text-color-light);
+        }
+        /* Character switching */
+        body.light-mode #char-dark { display: none; }
+        body.dark-mode #char-light { display: none; }
+
+        /* --- GAME BACKGROUND & CHARACTER --- */
+        #game-background {
+            position: fixed;
+            inset: 0;
+            z-index: -10;
+            overflow: hidden;
+        }
+        #game-ground {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 50px;
+            background-color: var(--ground-color-dark);
+            transition: background-color 0.5s ease;
+        }
+        #main-character {
+            position: absolute;
+            bottom: 50px; /* On top of the ground */
+            left: 5%;
+            /* UPDATED: Character size increased */
+            width: 80px; 
+            height: 80px;
+            transition: left 0.1s linear;
+            will-change: left;
+            image-rendering: pixelated;
+        }
+        #main-character img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+        
+        /* --- SPECIAL EFFECTS --- */
+        .power-up-particle {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background-color: #FFEB3B;
+            border-radius: 50%;
+            animation: fade-out-up 0.5s ease-out forwards;
+        }
+        @keyframes fade-out-up {
+            from { transform: translateY(0) scale(1); opacity: 1; }
+            to { transform: translateY(-30px) scale(0); opacity: 0; }
+        }
+
+        .floating-orb {
+            position: absolute;
+            width: 15px;
+            height: 15px;
+            background-color: #FF9800;
+            border-radius: 50%;
+            box-shadow: 0 0 10px #FF9800, 0 0 20px #FFC107;
+            animation: float 4s ease-in-out infinite;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .screen-shake {
+            animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+        }
+        @keyframes shake {
+            10%, 90% { transform: translate3d(-1px, 0, 0); }
+            20%, 80% { transform: translate3d(2px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+            40%, 60% { transform: translate3d(4px, 0, 0); }
+        }
+
+        .project-card:hover .glitch-img {
+            animation: glitch 0.3s linear infinite;
+        }
+        @keyframes glitch {
+            0% { transform: translate(0); }
+            20% { transform: translate(-2px, 2px); }
+            40% { transform: translate(-2px, -2px); }
+            60% { transform: translate(2px, 2px); }
+            80% { transform: translate(2px, -2px); }
+            100% { transform: translate(0); }
+        }
+        
+        .char-is-changing {
+            animation: mode-change-effect 0.5s ease-in-out;
+        }
+        @keyframes mode-change-effect {
+            0% { transform: scale(1) rotate(0deg); opacity: 1; }
+            50% { transform: scale(0) rotate(180deg); opacity: 0; }
+            100% { transform: scale(1) rotate(360deg); opacity: 1; }
+        }
+
+
+        /* --- GENERAL STYLES --- */
+        .window-box {
+            background-color: var(--window-bg-dark);
+            border: 4px solid var(--border-color-dark);
+            box-shadow: 6px 6px 0 #000000;
+            transition: background-color 0.5s, border-color 0.5s;
+        }
+        .btn-retro {
+            background-color: #FF00FF;
+            color: #FFFFFF;
+            border: 4px solid #FFFFFF;
+            box-shadow: 4px 4px 0 #000000;
+            padding: 12px 24px;
+            text-shadow: 2px 2px #000000;
+            transition: all 0.1s ease-in-out;
+            cursor: pointer;
+        }
+        .btn-retro:hover {
+            transform: translate(2px, 2px);
+            box-shadow: 2px 2px 0 #000000;
+            background-color: #00FFFF;
+            color: #000020;
+        }
+        .typed-cursor { animation: blink 0.5s infinite steps(1, start); }
+        @keyframes blink { 50% { opacity: 0; } }
+        .fade-in-section { opacity: 0; transition: opacity 0.5s ease-in; }
+        .fade-in-section.is-visible { opacity: 1; }
+        #header {
+            background-color: var(--bg-color-dark);
+            border-bottom: 4px solid var(--border-color-dark);
+            transition: background-color 0.5s, border-color 0.5s;
+        }
+        footer { border-top: 4px solid var(--border-color-dark); transition: border-color 0.5s; }
+        .skill-bar-container { display: flex; gap: 4px; }
+        .skill-block { width: 10%; height: 20px; background-color: #444; border: 2px solid #000; }
+        .skill-block.filled { background-color: #00FFFF; box-shadow: inset 2px 2px #FFFFFF, inset -2px -2px #00AADD; }
+        .project-card { border: 4px solid var(--border-color-dark); transition: transform 0.2s ease, box-shadow 0.2s; }
+        
+        /* --- AI CHAT STYLES --- */
+        #ai-chat-box { height: 300px; background-color: #000010; border: 2px solid #00FFFF; padding: 10px; overflow-y: auto; margin-bottom: 1rem; line-height: 1.5; }
+        #ai-chat-box p { text-shadow: none; }
+        #ai-input { background-color: #000010; border: 2px solid #00FFFF; padding: 10px; width: 100%; color: #E0E0E0; }
+        #ai-input:focus { outline: none; border-color: #FF00FF; }
+
+        /* FIXED: Light mode styles for AI Chat */
+        body.light-mode #ai-chat-box {
+            background-color: #f0f8ff;
+            border-color: var(--border-color-light);
+            color: var(--text-color-light);
+        }
+        body.light-mode #ai-input {
+            background-color: #f0f8ff;
+            border-color: var(--border-color-light);
+            color: var(--text-color-light);
+        }
+        body.light-mode #ai-input::placeholder {
+            color: var(--secondary-text-light);
+            opacity: 1;
+        }
+
+    </style>
+</head>
+<body class="dark-mode">
+
+    <!-- Game Background -->
+    <div id="game-background">
+        <div id="main-character">
+            <img id="char-light" src="dark.png" alt="Light Mode Character" onerror="this.onerror=null;this.src='https://placehold.co/64x64/cccccc/000000?text=Error';">
+            <img id="char-dark" src="red.png" alt="Dark Mode Character" onerror="this.onerror=null;this.src='https://placehold.co/64x64/cccccc/000000?text=Error';">
+        </div>
+        <div id="game-ground"></div>
+    </div>
+
+    <!-- Header -->
+    <header id="header" class="fixed top-0 left-0 right-0 z-50">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="text-2xl font-bold secondary-accent-color">CKR_</div>
+            <div class="hidden md:flex space-x-4 items-center text-xs">
+                <a href="#about" class="hover:text-accent-color transition-colors">&gt; ABOUT</a>
+                <a href="#projects" class="hover:text-accent-color transition-colors">&gt; PROJECTS</a>
+                <a href="#skills" class="hover:text-accent-color transition-colors">&gt; SKILLS</a>
+                <a href="#ai-sidekick" class="hover:text-accent-color transition-colors">&gt; AI_SIDEKICK</a>
+                <a href="#contact" class="hover:text-accent-color transition-colors">&gt; CONTACT</a>
+            </div>
+            <button id="theme-toggle" class="p-2">
+                <i data-feather="sun" class="text-white"></i>
+                <i data-feather="moon" class="text-white hidden"></i>
+            </button>
+        </nav>
+    </header>
+    
+    <!-- Main Content -->
+    <main class="container mx-auto px-6 pt-24 relative z-10">
+        <!-- Hero Section -->
+        <section id="hero" class="min-h-screen flex items-center justify-center text-center">
+            <div>
+                <h1 class="text-lg secondary-accent-color mb-4">LOADING PROFILE...</h1>
+                <h2 class="text-3xl sm:text-4xl md:text-5xl font-black leading-tight">CHEVURU CHAITANYA<br/>KRISHNA REDDY</h2>
+                <h3 class="text-lg sm:text-xl md:text-2xl font-black mt-4">
+                    <span class="accent-color">&gt;</span> <span id="typing-text"></span><span class="typed-cursor">_</span>
+                </h3>
+                <p class="mt-8 max-w-xl mx-auto secondary-text text-xs md:text-sm">
+                    SYSTEM.OUT.PRINTLN("A Computer Science student specializing in backend dev, AI, and cloud solutions.");
+                </p>
+                <div class="mt-10">
+                    <a href="#about" id="start-button" class="btn-retro">
+                        PRESS START
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- About Section -->
+        <section id="about" class="py-20 fade-in-section">
+            <div class="window-box p-6 md:p-8">
+                <h2 class="text-2xl md:text-3xl font-bold mb-6 accent-color">PLAYER_INFO.TXT</h2>
+                <div class="space-y-4 text-xs md:text-sm secondary-text leading-relaxed">
+                    <p>&gt; Hello! I'm Chaitanya, a B.Tech Computer Science student at VIT, Chennai.</p>
+                    <p>&gt; My main quest is to build robust and intelligent systems. I have a strong foundation in backend development and have hands-on experience creating full-stack web platforms.</p>
+                    <p>&gt; I am currently exploring the dungeons of cybersecurity, scalable systems, and emerging technologies.</p>
+                    <p>&gt; SIDE QUEST: Drawing and sketching.</p>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Education Section -->
+        <section id="education" class="py-20 fade-in-section">
+             <div class="window-box p-6 md:p-8">
+                <h2 class="text-2xl md:text-3xl font-bold mb-8 accent-color">LEVEL_UP_HISTORY.LOG</h2>
+                <div class="space-y-6">
+                    <div>
+                        <p class="secondary-accent-color">2022 - PRESENT</p>
+                        <h3 class="text-lg">Vellore Institute of Technology</h3>
+                        <p class="text-xs secondary-text">B.TECH IN COMPUTER SCIENCE // CGPA: 8.02</p>
+                    </div>
+                    <div>
+                        <p class="secondary-accent-color">2020 - 2022</p>
+                        <h3 class="text-lg">Narayana Junior College</h3>
+                        <p class="text-xs secondary-text">INTERMEDIATE (CLASS XII) // SCORE: 92.5%</p>
+                    </div>
+                    <div>
+                        <p class="secondary-accent-color">2019 - 2020</p>
+                        <h3 class="text-lg">Narayana High School</h3>
+                        <p class="text-xs secondary-text">CLASS X // SCORE: 99%</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Projects Section -->
+        <section id="projects" class="py-20 fade-in-section">
+            <h2 class="text-2xl md:text-3xl font-bold mb-8 text-center accent-color">COMPLETED_MISSIONS:</h2>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="project-card bg-[#000030] p-4"><div class="h-40 mb-4 border-4 border-black overflow-hidden"><img src="https://placehold.co/600x400/000020/00FFFF?text=MISSION_01" class="w-full h-full object-cover glitch-img" alt="Railway Monitoring Project"></div><h3 class="text-lg font-bold secondary-accent-color">IOT RAILWAY MONITOR</h3><p class="text-xs secondary-text mt-2 h-16">Real-time fault detection system using ESP32 and cloud integration.</p></div>
+                <div class="project-card bg-[#000030] p-4"><div class="h-40 mb-4 border-4 border-black overflow-hidden"><img src="https://placehold.co/600x400/000020/00FFFF?text=MISSION_02" class="w-full h-full object-cover glitch-img" alt="Restaurant Website Project"></div><h3 class="text-lg font-bold secondary-accent-color">AATC RESTAURANT APP</h3><p class="text-xs secondary-text mt-2 h-16">Responsive web app with Firebase for live order tracking.</p></div>
+                <div class="project-card bg-[#000030] p-4"><div class="h-40 mb-4 border-4 border-black overflow-hidden"><img src="https://placehold.co/600x400/000020/00FFFF?text=MISSION_03" class="w-full h-full object-cover glitch-img" alt="Anime Recommendation Project"></div><h3 class="text-lg font-bold secondary-accent-color">ANIME REC SYSTEM</h3><p class="text-xs secondary-text mt-2 h-16">An intuitive, genre-based anime suggestion tool built with JS.</p></div>
+            </div>
+        </section>
+
+        <!-- Skills Section -->
+        <section id="skills" class="py-20 fade-in-section">
+            <div class="window-box p-6 md:p-8">
+                <h2 class="text-2xl md:text-3xl font-bold mb-8 accent-color">SKILL_TREE.DATA</h2>
+                <div class="grid md:grid-cols-2 gap-8">
+                    <div>
+                        <h3 class="text-lg font-semibold mb-4">TECH_SKILLS:</h3>
+                        <div class="space-y-4">
+                            <div><p class="mb-2 text-xs">C/C++</p><div class="skill-bar-container" data-skill="9"></div></div>
+                            <div><p class="mb-2 text-xs">PYTHON</p><div class="skill-bar-container" data-skill="8"></div></div>
+                            <div><p class="mb-2 text-xs">HTML/CSS/JS</p><div class="skill-bar-container" data-skill="9"></div></div>
+                            <div><p class="mb-2 text-xs">REACT.JS</p><div class="skill-bar-container" data-skill="7"></div></div>
+                        </div>
+                    </div>
+                    <div>
+                         <h3 class="text-lg font-semibold mb-4">ACHIEVEMENTS:</h3>
+                         <div class="space-y-4 text-xs">
+                             <p class="secondary-text"><span class="secondary-accent-color">*</span> MS_AZURE_AI_FUNDAMENTALS</p>
+                             <p class="secondary-text"><span class="secondary-accent-color">*</span> GOOGLE_CYBERSECURITY_FOUNDATIONS</p>
+                         </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- AI Sidekick Section -->
+        <section id="ai-sidekick" class="py-20 fade-in-section">
+            <div class="window-box p-6 md:p-8">
+                <h2 class="text-2xl md:text-3xl font-bold mb-6 accent-color">AI_SIDEKICK.EXE</h2>
+                <div id="ai-chat-box"><p><span class="secondary-accent-color">AI_SIDEKICK:</span> GREETINGS, PLAYER! I AM CKR'S AI ASSISTANT. ASK ME ANYTHING ABOUT HIS SKILLS OR PROJECTS.</p></div>
+                <div class="flex gap-4 mt-4">
+                    <input type="text" id="ai-input" placeholder="TYPE YOUR MESSAGE HERE..." />
+                    <button id="ai-send-btn" class="btn-retro text-xs !px-4 !py-2">SEND</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact Section -->
+        <section id="contact" class="py-20 text-center fade-in-section">
+            <h2 class="text-2xl md:text-3xl font-bold mb-4 accent-color">CONTACT_PLAYER_1</h2>
+            <p class="max-w-md mx-auto secondary-text text-xs md:text-sm leading-relaxed mb-8">OPEN TO NEW QUESTS AND COLLABORATIONS. SEND A MESSAGE TO JOIN THE PARTY.</p>
+            <div class="flex flex-col sm:flex-row justify-center items-center gap-4">
+                <a href="mailto:chaitanyakrishna294@gmail.com" class="btn-retro">SEND_MESSAGE</a>
+                <a href="#ai-sidekick" class="btn-retro">✨ TALK TO MY AI SIDEKICK</a>
+            </div>
+        </section>
+    </main>
+    
+    <!-- Footer -->
+    <footer class="py-8 text-center relative z-10">
+        <div class="flex justify-center items-center space-x-6 mb-4">
+            <a href="https://github.com" target="_blank" rel="noopener noreferrer" class="hover:text-accent-color transition-colors"><i data-feather="github" class="w-6 h-6"></i></a>
+            <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" class="hover:text-accent-color transition-colors"><i data-feather="linkedin" class="w-6 h-6"></i></a>
+        </div>
+        <p class="secondary-text text-xs">DESIGNED & BUILT BY CKR_ // 2024</p>
+    </footer>
+
+    <script>
+        // --- INITIALIZATION ---
+        document.addEventListener('DOMContentLoaded', () => {
+            feather.replace();
+            
+            startTypingAnimation();
+            setupScrollAnimations();
+            setupThemeToggle();
+            setupScrollCharacter();
+            spawnFloatingOrbs();
+            setupSpecialEffects();
+            setupAISidekick();
+        });
+
+        // --- TYPING ANIMATION ---
+        function startTypingAnimation() {
+            const roles = ["BACKEND DEVELOPER", "AI ENTHUSIAST", "CLOUD ARCHITECT"];
+            let roleIndex = 0;
+            let charIndex = 0;
+            const typingTextElement = document.getElementById('typing-text');
+            function type() {
+                if (charIndex < roles[roleIndex].length) {
+                    typingTextElement.textContent += roles[roleIndex].charAt(charIndex++);
+                    setTimeout(type, 150);
+                } else {
+                    setTimeout(erase, 2500);
+                }
+            }
+            function erase() {
+                if (charIndex > 0) {
+                    typingTextElement.textContent = roles[roleIndex].substring(0, --charIndex);
+                    setTimeout(erase, 75);
+                } else {
+                    roleIndex = (roleIndex + 1) % roles.length;
+                    setTimeout(type, 500);
+                }
+            }
+            type();
+        }
+
+        // --- SCROLL-BASED ANIMATIONS ---
+        function setupScrollAnimations() {
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('is-visible');
+                        if (entry.target.id === 'skills') {
+                            animateSkillBars();
+                        }
+                    }
+                });
+            }, { threshold: 0.2 });
+            document.querySelectorAll('.fade-in-section').forEach(section => observer.observe(section));
+        }
+
+        function animateSkillBars() {
+            document.querySelectorAll('.skill-bar-container').forEach(bar => {
+                const skillLevel = parseInt(bar.dataset.skill, 10);
+                if (bar.children.length !== 10) {
+                    bar.innerHTML = '';
+                    for (let i = 0; i < 10; i++) {
+                        const block = document.createElement('div');
+                        block.className = 'skill-block' + (i < skillLevel ? ' filled' : '');
+                        bar.appendChild(block);
+                    }
+                }
+            });
+        }
+
+        // --- THEME TOGGLE ---
+        function setupThemeToggle() {
+            const toggleButton = document.getElementById('theme-toggle');
+            const character = document.getElementById('main-character');
+            if (!toggleButton) return;
+
+            toggleButton.addEventListener('click', () => {
+                const sunIcon = toggleButton.querySelector('.feather-sun');
+                const moonIcon = toggleButton.querySelector('.feather-moon');
+
+                // Add animation class
+                character.classList.add('char-is-changing');
+
+                document.body.classList.toggle('light-mode');
+                document.body.classList.toggle('dark-mode');
+
+                if (sunIcon) sunIcon.classList.toggle('hidden');
+                if (moonIcon) moonIcon.classList.toggle('hidden');
+                
+                // Remove animation class after it finishes
+                setTimeout(() => {
+                    character.classList.remove('char-is-changing');
+                }, 500);
+            });
+        }
+
+        // --- SCROLLING CHARACTER & EFFECTS ---
+        function setupScrollCharacter() {
+            const character = document.getElementById('main-character');
+            let lastScrollY = window.scrollY;
+
+            window.addEventListener('scroll', () => {
+                const scrollableHeight = document.documentElement.scrollHeight - window.innerHeight;
+                if (scrollableHeight <= 0) return;
+                
+                const scrollPercent = window.scrollY / scrollableHeight;
+                const characterX = 5 + scrollPercent * 85;
+                character.style.left = `${characterX}%`;
+
+                // Power up effect on scroll
+                if (Math.abs(window.scrollY - lastScrollY) > 10) {
+                    createPowerUpParticle(character);
+                }
+                lastScrollY = window.scrollY;
+            });
+        }
+        
+        function createPowerUpParticle(character) {
+            const particle = document.createElement('div');
+            particle.className = 'power-up-particle';
+            const charRect = character.getBoundingClientRect();
+            particle.style.left = `${charRect.left + charRect.width / 2 - 4}px`;
+            particle.style.top = `${charRect.top + charRect.height / 2 - 4}px`;
+            document.body.appendChild(particle);
+            setTimeout(() => particle.remove(), 500);
+        }
+
+        // --- BACKGROUND ORBS & OTHER EFFECTS ---
+        function spawnFloatingOrbs() {
+            const background = document.getElementById('game-background');
+            for (let i = 0; i < 10; i++) {
+                const orb = document.createElement('div');
+                orb.className = 'floating-orb';
+                orb.style.left = `${Math.random() * 100}%`;
+                orb.style.top = `${Math.random() * 80}%`; // Distribute vertically
+                orb.style.animationDelay = `${Math.random() * 4}s`;
+                background.appendChild(orb);
+            }
+        }
+
+        function setupSpecialEffects() {
+            const startButton = document.getElementById('start-button');
+            startButton.addEventListener('click', (e) => {
+                e.preventDefault(); // Prevent default anchor behavior
+                document.body.classList.add('screen-shake');
+                setTimeout(() => {
+                    document.body.classList.remove('screen-shake');
+                    // Smooth scroll to the target after shake
+                    const targetId = startButton.getAttribute('href');
+                    document.querySelector(targetId).scrollIntoView({ behavior: 'smooth' });
+                }, 500);
+            });
+        }
+
+        // --- AI SIDEKICK LOGIC ---
+        function setupAISidekick() {
+            const aiChatBox = document.getElementById('ai-chat-box');
+            const aiInput = document.getElementById('ai-input');
+            const aiSendBtn = document.getElementById('ai-send-btn');
+            let chatHistory = [];
+
+            const addMessage = (sender, message) => {
+                const p = document.createElement('p');
+                p.innerHTML = `<span class="${sender === 'PLAYER' ? 'accent-color' : 'secondary-accent-color'}">${sender}:</span> ${message}`;
+                aiChatBox.appendChild(p);
+                aiChatBox.scrollTop = aiChatBox.scrollHeight;
+            };
+
+            const sendMessageToAI = async () => {
+                const userMessage = aiInput.value.trim();
+                if (!userMessage) return;
+                addMessage('PLAYER', userMessage);
+                aiInput.value = '';
+                aiSendBtn.disabled = true;
+                addMessage('AI_SIDEKICK', '...');
+                
+                const portfolioContext = `You are a retro video game AI Sidekick on Chaitanya Krishna Reddy's portfolio website. Your name is CKR_AI. Your personality is helpful, a bit quirky, and you speak like a classic 8-bit game character. Use phrases like "GREETINGS, PLAYER!", "PROCESSING...", "QUERY ACCEPTED.", "CKR's stats are impressive!", etc. Answer questions based ONLY on the following information about Chaitanya (CKR): - Summary: Motivated BTech Computer Science student with strong foundation in backend development, AI-powered applications, and cloud solutions. - Education: B.Tech in CS at VIT, Chennai (CGPA 8.02). Intermediate from Narayana Junior College (92.5%). Class X from Narayana High School (99%). - Skills: C/C++, Python, Java, SQL, HTML, CSS, React.js. - Tools: VS Code, Jupyter Notebook, Git. - Projects: 1. IoT Railway Track Monitoring: Real-time fault detection with ESP32 and cloud. 2. AATC Restaurant Website: Responsive web app with Firebase for live orders. 3. Anime Recommendation System: Genre-based suggestion tool with JS. - Certifications: Microsoft Certified Azure AI Fundamentals, Google Foundations of Cybersecurity. - Interests: Drawing and sketching. Keep your answers concise and in character.`;
+                chatHistory.push({ role: "user", parts: [{ text: portfolioContext + "\n\nPLAYER ASKS: " + userMessage }] });
+
+                const payload = { contents: chatHistory };
+                const apiKey = "AIzaSyDeksZr8ejceEoVR6pGgm7ag7qiJm76rcU";
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+                try {
+                    const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                    const result = await response.json();
+                    aiChatBox.removeChild(aiChatBox.lastChild);
+                    if (result.candidates && result.candidates.length > 0 && result.candidates[0].content && result.candidates[0].content.parts && result.candidates[0].content.parts.length > 0) {
+                        const aiResponse = result.candidates[0].content.parts[0].text;
+                        addMessage('AI_SIDEKICK', aiResponse);
+                        chatHistory.push({ role: "model", parts: [{ text: aiResponse }] });
+                    } else {
+                        addMessage('AI_SIDEKICK', 'SYSTEM_ERROR: NO_RESPONSE.');
+                    }
+                } catch (error) {
+                    console.error("AI Error:", error);
+                    aiChatBox.removeChild(aiChatBox.lastChild);
+                    addMessage('AI_SIDEKICK', 'CONNECTION_LOST.');
+                } finally {
+                    aiSendBtn.disabled = false;
+                    aiInput.focus();
+                }
+            };
+            aiSendBtn.addEventListener('click', sendMessageToAI);
+            aiInput.addEventListener('keypress', e => e.key === 'Enter' && sendMessageToAI());
+        }
+    </script>
+</body>
+</html>
